@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi certificado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fbf5ec; --card:#ffffff; --ink:#3b2418; --muted:#7a6457;
+    --berry:#8e1f3b; --berry-dark:#6d1529; --gold:#c9963b; --green:#2f6b3a;
+    --line:#ecdfcf;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:520px;margin:0 auto;padding:24px 16px 48px}
+  header{text-align:center;padding:8px 0 20px}
+  .emoji{font-size:44px;line-height:1}
+  h1{font-size:30px;margin:8px 0 4px;color:var(--berry);font-weight:800}
+  .sub{margin:0;color:var(--muted);font-size:17px}
+  .btn{display:flex;align-items:center;gap:14px;width:100%;text-decoration:none;color:#fff;
+       background:var(--berry);border:0;border-radius:18px;padding:20px 18px;margin:0 0 14px;
+       font:800 20px Nunito,system-ui,sans-serif;text-align:left;cursor:pointer;
+       box-shadow:0 4px 0 var(--berry-dark)}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--berry-dark)}
+  .btn .ico{font-size:30px;flex:none}
+  .btn small{display:block;font-weight:400;font-size:15px;opacity:.9}
+  .btn.green{background:var(--green);box-shadow:0 4px 0 #1f4a27}
+  .btn.gold{background:var(--gold);box-shadow:0 4px 0 #9c722a}
+  .hidden{display:none}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:6px}
+  .card h2{margin:0 0 6px;font-size:22px;color:var(--berry)}
+  .card p{margin:0 0 14px;color:var(--muted);font-size:16px}
+  label{font-weight:700;font-size:16px;display:block;margin-bottom:6px}
+  input{width:100%;font:400 20px Nunito,system-ui,sans-serif;padding:14px;border:2px solid var(--line);border-radius:12px;margin-bottom:14px}
+  input:focus{outline:none;border-color:var(--berry)}
+  canvas{width:100%;height:auto;border-radius:10px;display:block;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+  footer{text-align:center;color:var(--muted);font-size:14px;margin-top:28px}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="emoji">🎓</div>
+    <h1>Tu certificado</h1>
+    <p class="sub">Escribe tu nombre completo y míralo aparecer en el certificado 👇</p>
+  </header>
+  <section class="card" id="cert">
+    <label for="nombre">Tu nombre completo</label>
+    <input id="nombre" type="text" maxlength="45" placeholder="Ej: María Fernanda López" autocomplete="name" autofocus>
+    <canvas id="lienzo" width="1920" height="1359" aria-label="Vista previa del certificado"></canvas>
+    <button class="btn" id="descargar" type="button"><span class="ico">⬇️</span><span>Descargar certificado</span></button>
+  </section>
+  <p style="text-align:center;margin-top:18px"><a href="./" style="color:var(--berry);font-weight:700">← Volver a mi área de miembros</a></p>
+  <footer>Hecho con amor por Alicia 💛</footer>
+</main>
+<script>
+(function(){
+  var ESCALA = 3;                 // imagem base 640x453 desenhada em 3x
+  var LINHA = {x1:140, x2:512, y:193};  // linha do nome, em pixels da imagem original
+  var img = new Image();
+  var lienzo = document.getElementById('lienzo');
+  var ctx = lienzo.getContext('2d');
+  var input = document.getElementById('nombre');
+
+  function dibujar(){
+    if (!img.complete || !img.naturalWidth) return;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, lienzo.width, lienzo.height);
+    var nombre = input.value.trim();
+    if (!nombre) return;
+    var ancho = (LINHA.x2 - LINHA.x1) * ESCALA;
+    var tam = 34 * ESCALA;
+    ctx.font = tam + 'px "Great Vibes", cursive';
+    while (ctx.measureText(nombre).width > ancho && tam > 14 * ESCALA){
+      tam -= 2; ctx.font = tam + 'px "Great Vibes", cursive';
+    }
+    ctx.fillStyle = '#5a1a24';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(nombre, (LINHA.x1 + LINHA.x2) / 2 * ESCALA, LINHA.y * ESCALA);
+  }
+
+  img.onload = dibujar;
+  img.src = 'certificado.png';
+  if (document.fonts && document.fonts.load) {
+    document.fonts.load('40px "Great Vibes"').then(dibujar).catch(function(){});
+  }
+  input.addEventListener('input', dibujar);
+
+  document.getElementById('descargar').addEventListener('click', function(){
+    if (!input.value.trim()) { alert('Escribe tu nombre primero 😊'); input.focus(); return; }
+    dibujar();
+    var a = document.createElement('a');
+    a.download = 'Certificado Mermeladas Caseras.png';
+    a.href = lienzo.toDataURL('image/png');
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+})();
+</script>
+</body>
+</html>
